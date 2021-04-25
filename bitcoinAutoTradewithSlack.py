@@ -63,6 +63,8 @@ upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
 # 시작 메세지 슬랙 전송
 post_message(myToken, "#alarm", "autotrade start")
+balances = upbit.get_balances()
+print(balances)
 
 while True:
     try:
@@ -78,16 +80,16 @@ while True:
                 krw = get_balance("KRW")
                 if krw > 5000:
                     buy_result = upbit.buy_market_order("KRW-BTC", krw*0.9995)
-                    post_message(myToken, "#crypto",
+                    post_message(myToken, "#alarm",
                                  "BTC buy : " + str(buy_result))
         else:
             btc = get_balance("BTC")
             if btc > 0.00008:
                 sell_result = upbit.sell_market_order("KRW-BTC", btc*0.9995)
-                post_message(myToken, "#crypto",
+                post_message(myToken, "#alarm",
                              "BTC buy : " + str(sell_result))
         time.sleep(1)
     except Exception as e:
         print(e)
-        post_message(myToken, "#crypto", e)
+        post_message(myToken, "#alarm", e)
         time.sleep(1)
