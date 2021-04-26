@@ -3,6 +3,7 @@ import pyupbit
 import datetime
 import requests
 import schedule
+import numpy as np
 import time
 
 k = 0.5
@@ -27,7 +28,7 @@ def get_ror():
             max_ror = ror
             k = _k
     post_message(myToken, "#alarm", "오늘의 매수 목표가 : " +
-                 get_target_price("KRW-BTC", k))
+                 str(get_target_price("KRW-BTC", k)))
 
 
 schedule.every().day.at("09:00").do(get_ror)
@@ -65,6 +66,20 @@ def get_start_time(ticker):
     return start_time
 
 
+def get_ma3(ticker):
+    """3일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=3)
+    ma3 = df['close'].rolling(3).mean().iloc[-1]
+    return ma3
+
+
+def get_ma5(ticker):
+    """5일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=5)
+    ma5 = df['close'].rolling(5).mean().iloc[-1]
+    return ma5
+
+
 def get_ma15(ticker):
     """15일 이동 평균선 조회"""
     df = pyupbit.get_ohlcv(ticker, interval="day", count=15)
@@ -93,8 +108,7 @@ upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
 # 시작 메세지 슬랙 전송
 post_message(myToken, "#alarm", "autotrade start")
-balances = upbit.get_balances()
-print(balances)
+# get_ror()
 
 
 while True:
@@ -106,16 +120,22 @@ while True:
 
         if start_time < now < end_time - datetime.timedelta(seconds=10):
             target_price = get_target_price("KRW-BTC", k)
+            krw = get_balance("KRW")
+            btc = get_balance("BTC")
+            # 3일 이평선
+            ma3 = get_ma3("KRW-BTC")
+            # 5일 이평선
+            ma5 = get_ma5("KRW-BTC")
+            # 15일 이평선
             ma15 = get_ma15("KRW-BTC")
             current_price = get_current_price("KRW-BTC")
-            if target_price < current_price and ma15 < current_price:
-                krw = get_balance("KRW")
+            # 거래기준 : 5일 이평선
+            if target_price < current_price and ma5 < current_price:
                 if krw > 5000:
                     buy_result = upbit.buy_market_order("KRW-BTC", krw*0.9995)
                     post_message(myToken, "#alarm",
                                  "BTC buy : " + str(buy_result))
         else:
-            btc = get_balance("BTC")
             if btc > 0.00008:
                 sell_result = upbit.sell_market_order("KRW-BTC", btc*0.9995)
                 post_message(myToken, "#alarm",
