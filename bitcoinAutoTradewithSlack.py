@@ -23,9 +23,11 @@ def get_ror():
                              1)
 
         ror = df['ror'].cumprod()[-2]
-        if max_ror <= ror:
+        if max_ror < ror:
             max_ror = ror
             k = _k
+    post_message(myToken, "#alarm", "오늘의 매수 목표가 : " +
+                 get_target_price("KRW-BTC", k))
 
 
 schedule.every().day.at("09:00").do(get_ror)
