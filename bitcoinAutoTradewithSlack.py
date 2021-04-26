@@ -151,13 +151,14 @@ while True:
                                  "매수 목표가 " + str(target_price) + "달성 / " + "매수 평균단가 : " + str(avg_buy))
 
             if btc > 0.00008:
-                if current_price >= avg_buy * 1.004:
+                if current_price >= avg_buy * 1.006:
                     print("point!")
                     sell_result = upbit.sell_market_order(
                         "KRW-BTC", btc*0.9995)
                     post_message(myToken, "#alarm",
-                                 "매수 목표가 " + str(avg_buy * 1.004) + "달성 /" + "매도 평균단가 : " + str(avg_buy * 1.004))
+                                 "매수 목표가 " + str(avg_buy * 1.006) + "달성 /" + "매도 평균단가 : " + str(avg_buy * 1.006))
                     avg_buy = 0
+                    time.sleep(180)
         else:
             if btc > 0.00008:
                 sell_result = upbit.sell_market_order("KRW-BTC", btc*0.9995)
