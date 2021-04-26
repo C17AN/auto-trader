@@ -162,9 +162,10 @@ while True:
                     time.sleep(180)
                 # 스탑로스 기준 : 20% 손실
                 elif current_price <= avg_buy * 0.8:
-                                        sell_result = upbit.sell_market_order(
+                    sell_result = upbit.sell_market_order(
                         "KRW-BTC", btc*0.9995)
-                    post_message(myToken, "#alarm", "스탑로스 발동, 매도 평균단가 : " + str(avg_buy * 0.8))
+                    post_message(myToken, "#alarm",
+                                 "스탑로스 발동, 매도 평균단가 : " + str(avg_buy * 0.8))
                     avg_buy = 0
                     time.sleep(300)
 
