@@ -26,14 +26,9 @@ def get_ror():
         if max_ror <= ror:
             max_ror = ror
             k = _k
-    return (k, max_ror)
 
 
 schedule.every().day.at("09:00").do(get_ror)
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)  # wait one minute
 
 
 access = "oKn7muzVmQGhOAYxjIPuHJsxD54z83QkDnVk5egl"
@@ -105,6 +100,7 @@ while True:
         now = datetime.datetime.now()
         start_time = get_start_time("KRW-BTC")
         end_time = start_time + datetime.timedelta(days=1)
+        schedule.run_pending()
 
         if start_time < now < end_time - datetime.timedelta(seconds=10):
             target_price = get_target_price("KRW-BTC", k)
