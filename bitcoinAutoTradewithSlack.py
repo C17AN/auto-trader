@@ -53,7 +53,7 @@ def post_message(token, channel, text):
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
+    df = pyupbit.get_ohlcv(ticker, interval="minute3", count=2)
     target_price = df.iloc[0]['close'] + \
         (df.iloc[0]['high'] - df.iloc[0]['low']) * k
     return target_price
@@ -107,8 +107,10 @@ def get_current_price(ticker):
 upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
 # 시작 메세지 슬랙 전송
-post_message(myToken, "#alarm", "autotrade start")
-# get_ror()
+post_message(myToken, "#alarm", "매매 시작")
+# 구매시 평단
+avg_buy = 62837969
+get_ror()
 
 
 while True:
@@ -130,16 +132,30 @@ while True:
             ma15 = get_ma15("KRW-BTC")
             current_price = get_current_price("KRW-BTC")
             # 거래기준 : 5일 이평선
+            #print(target_price, current_price, ma5)
+            print("현재가 : " + str(current_price) + " / 매수 목표 : " + str(target_price) +
+                  " / 매도 목표 : " + str(avg_buy * 1.004))
             if target_price < current_price and ma5 < current_price:
+                print("매수 포지션: ", current_price, avg_buy, btc)
                 if krw > 5000:
+                    avg_buy = current_price
                     buy_result = upbit.buy_market_order("KRW-BTC", krw*0.9995)
                     post_message(myToken, "#alarm",
-                                 "BTC buy : " + str(buy_result))
+                                 "매수 목표가 " + str(target_price) + "달성 / " + "매수 평균단가 : " + str(avg_buy))
+
+            if btc > 0.00008:
+                if current_price >= avg_buy * 1.004:
+                    print("point!")
+                    sell_result = upbit.sell_market_order(
+                        "KRW-BTC", btc*0.9995)
+                    post_message(myToken, "#alarm",
+                                 "매수 목표가 " + str(avg_buy * 1.004) + "달성 /" + "매도 평균단가 : " + str(avg_buy * 1.004))
+                    avg_buy = 0
         else:
             if btc > 0.00008:
                 sell_result = upbit.sell_market_order("KRW-BTC", btc*0.9995)
                 post_message(myToken, "#alarm",
-                             "BTC buy : " + str(sell_result))
+                             "일일 매도 : " + str(sell_result))
         time.sleep(1)
     except Exception as e:
         print(e)
