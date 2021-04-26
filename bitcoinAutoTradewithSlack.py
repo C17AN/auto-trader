@@ -15,14 +15,11 @@ def check_alive():
     post_message(myToken, "#alarm", "봇 동작중")
 
 
-schedule.every().hour.do(check_alive)
-
-
 def get_ror():
     global k
     max_ror = 0
     for _k in np.arange(0.1, 1.0, 0.1):
-        df = pyupbit.get_ohlcv("KRW-BTC", count=7)
+        df = pyupbit.get_ohlcv("KRW-BTC", interval="minute30", count=7)
         df['range'] = (df['high'] - df['low']) * _k
         df['target'] = df['open'] + df['range'].shift(1)
 
@@ -34,12 +31,12 @@ def get_ror():
         if max_ror < ror:
             max_ror = ror
             k = _k
-    post_message(myToken, "#alarm", "오늘의 매수 목표가 : " +
+    post_message(myToken, "#alarm", "매수 목표가 : " +
                  str(get_target_price("KRW-BTC", k)))
 
 
-schedule.every().day.at("09:00").do(get_ror)
-
+# schedule.every().day.at("09:00").do(get_ror)
+schedule.every().hour.do(get_ror)
 
 access = "oKn7muzVmQGhOAYxjIPuHJsxD54z83QkDnVk5egl"
 secret = "6dyRC8BGCy8HTt1n1bTLnIhiYvyEAfXxdXMIw20g"
