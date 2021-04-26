@@ -2,6 +2,39 @@ import time
 import pyupbit
 import datetime
 import requests
+import schedule
+import time
+
+k = 0.5
+
+# 매일 9시에 k값 구함
+
+
+def get_ror():
+    global k
+    max_ror = 0
+    for _k in np.arange(0.1, 1.0, 0.1):
+        df = pyupbit.get_ohlcv("KRW-BTC", count=7)
+        df['range'] = (df['high'] - df['low']) * _k
+        df['target'] = df['open'] + df['range'].shift(1)
+
+        df['ror'] = np.where(df['high'] > df['target'],
+                             df['close'] / df['target'],
+                             1)
+
+        ror = df['ror'].cumprod()[-2]
+        if max_ror <= ror:
+            max_ror = ror
+            k = _k
+    return (k, max_ror)
+
+
+schedule.every().day.at("09:00").do(get_ror)
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)  # wait one minute
+
 
 access = "oKn7muzVmQGhOAYxjIPuHJsxD54z83QkDnVk5egl"
 secret = "6dyRC8BGCy8HTt1n1bTLnIhiYvyEAfXxdXMIw20g"
@@ -66,6 +99,7 @@ post_message(myToken, "#alarm", "autotrade start")
 balances = upbit.get_balances()
 print(balances)
 
+
 while True:
     try:
         now = datetime.datetime.now()
@@ -73,7 +107,7 @@ while True:
         end_time = start_time + datetime.timedelta(days=1)
 
         if start_time < now < end_time - datetime.timedelta(seconds=10):
-            target_price = get_target_price("KRW-BTC", 0.5)
+            target_price = get_target_price("KRW-BTC", k)
             ma15 = get_ma15("KRW-BTC")
             current_price = get_current_price("KRW-BTC")
             if target_price < current_price and ma15 < current_price:
