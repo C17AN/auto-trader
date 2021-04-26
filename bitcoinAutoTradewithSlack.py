@@ -11,6 +11,13 @@ k = 0.5
 # 매일 9시에 k값 구함
 
 
+def check_alive():
+    post_message(myToken, "#alarm", "봇 동작중")
+
+
+schedule.every().hour.do(check_alive)
+
+
 def get_ror():
     global k
     max_ror = 0
