@@ -83,7 +83,7 @@ def get_ma3min(ticker):
 def get_ma30min(ticker):
     """30분단위 이동 평균선 조회"""
     df = pyupbit.get_ohlcv(ticker, interval="minute30", count=5)
-    ma3min = df['close'].rolling(3).mean().iloc[-1]
+    ma30min = df['close'].rolling(3).mean().iloc[-1]
     return ma30min
 
 
@@ -131,7 +131,7 @@ print("autotrade start")
 post_message(myToken, "#alarm", "매매 시작")
 # 구매시 평단
 # 무조건 바꿔줘야함
-avg_buy = 63296336
+avg_buy = 62791899
 get_ror()
 
 
