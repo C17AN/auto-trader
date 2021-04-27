@@ -57,7 +57,7 @@ def post_message(token, channel, text):
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute3", count=2)
+    df = pyupbit.get_ohlcv(ticker, interval="minute30", count=3)
     target_price = df.iloc[0]['close'] + \
         (df.iloc[0]['high'] - df.iloc[0]['low']) * k
     return target_price
@@ -157,6 +157,8 @@ while True:
             #       " / 매도 목표 : " + str(avg_buy * 1.006))
             if target_price < current_price and ma30min < current_price:
                 print("매수 포지션: ", current_price, avg_buy, btc)
+                post_message(myToken, "#alarm",
+                             "매수 목표가 " + str(target_price) + " 달성 / " + " 매수 평균단가 : " + str(avg_buy))
                 if krw > 5000:
                     avg_buy = current_price
                     buy_result = upbit.buy_market_order("KRW-BTC", krw*0.9995)
@@ -181,11 +183,11 @@ while True:
                     avg_buy = 0
                     time.sleep(300)
 
-        else:
-            if btc > 0.00008:
-                sell_result = upbit.sell_market_order("KRW-BTC", btc*0.9995)
-                post_message(myToken, "#alarm",
-                             "일일 매도 : " + str(sell_result))
+        # else:
+        #     if btc > 0.00008:
+        #         sell_result = upbit.sell_market_order("KRW-BTC", btc*0.9995)
+        #         post_message(myToken, "#alarm",
+        #                      "일일 매도 : " + str(sell_result))
         time.sleep(1)
 
     except Exception as e:
