@@ -173,7 +173,7 @@ while True:
                     post_message(myToken, "#alarm",
                                  "매도 목표가 " + str(avg_buy * 1.006) + " 달성 /" + " 매도 평균단가 : " + str(avg_buy * 1.006))
                     avg_buy = 0
-                    time.sleep(180)
+                    time.sleep(300)
                 # 스탑로스 기준 : 20% 손실
                 elif current_price <= avg_buy * 0.8:
                     sell_result = upbit.sell_market_order(
