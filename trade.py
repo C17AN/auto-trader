@@ -57,7 +57,7 @@ def post_message(token, channel, text):
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute30", count=3)
+    df = pyupbit.get_ohlcv(ticker, interval="minute30", count=7)
     target_price = df.iloc[0]['close'] + \
         (df.iloc[0]['high'] - df.iloc[0]['low']) * k
     return target_price
@@ -128,7 +128,7 @@ print("autotrade start")
 post_message(myToken, "#alarm", "매매 시작")
 # 구매시 평단
 # 무조건 바꿔줘야함
-avg_buy = 64852862
+avg_buy = 64504000
 get_ror()
 
 
@@ -143,6 +143,9 @@ while True:
             target_price = get_target_price("KRW-BTC", k)
             krw = get_balance("KRW")
             btc = get_balance("BTC")
+            # 3분 이평선
+            ma3min = get_ma3min("KRW-BTC")
+            # 30분 이평선
             ma30min = get_ma30min("KRW-BTC")
             # 3일 이평선
             # ma3 = get_ma3("KRW-BTC")
@@ -156,30 +159,28 @@ while True:
             # print("현재가 : " + str(current_price) + " / 매수 목표 : " + str(target_price) +
             #       " / 매도 목표 : " + str(avg_buy * 1.006))
             if target_price < current_price and ma30min < current_price:
-                print("매수 포지션: ", current_price, avg_buy, btc)
-                post_message(myToken, "#alarm",
-                             "매수 목표가 " + str(target_price) + " 달성 / " + " 매수 평균단가 : " + str(avg_buy))
                 if krw > 5000:
                     avg_buy = current_price
                     buy_result = upbit.buy_market_order("KRW-BTC", krw*0.9995)
                     post_message(myToken, "#alarm",
                                  "매수 목표가 " + str(target_price) + " 달성 / " + " 매수 평균단가 : " + str(avg_buy))
 
-            if btc > 0.00008:
-                if current_price >= avg_buy * 1.006:
-                    print("point!")
+            if btc != None and btc > 0.00008:
+                if current_price >= avg_buy * 1.0065:
                     sell_result = upbit.sell_market_order(
                         "KRW-BTC", btc*0.9995)
                     post_message(myToken, "#alarm",
-                                 "매도 목표가 " + str(avg_buy * 1.006) + " 달성 /" + " 매도 평균단가 : " + str(avg_buy * 1.006))
+                                 "매도 목표가 " + str(avg_buy * 1.0065) + " 달성 /" + " 매도 평균단가 : " + str(avg_buy * 1.0065))
                     avg_buy = 0
                     time.sleep(300)
-                # 스탑로스 기준 : 20% 손실
-                elif current_price <= avg_buy * 0.8:
+                    post_message(myToken, "#alarm",
+                                 "다음 매수 목표가 " + str(target_price))
+                # 스탑로스 기준 : 10% 손실
+                elif current_price <= avg_buy * 0.9:
                     sell_result = upbit.sell_market_order(
                         "KRW-BTC", btc*0.9995)
                     post_message(myToken, "#alarm",
-                                 "스탑로스 발동, 매도 평균단가 : " + str(avg_buy * 0.8))
+                                 "스탑로스 발동, 매도 평균단가 : " + str(avg_buy * 0.9))
                     avg_buy = 0
                     time.sleep(300)
 
