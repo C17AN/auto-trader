@@ -128,7 +128,7 @@ print("autotrade start")
 post_message(myToken, "#alarm", "매매 시작")
 # 구매시 평단
 # 무조건 바꿔줘야함
-avg_buy = 62791899
+avg_buy = 64852862
 get_ror()
 
 
